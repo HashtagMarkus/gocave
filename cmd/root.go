@@ -18,6 +18,14 @@ func ioReader(file string) io.ReaderAt {
 	return r
 }
 
+func HandleError(err error, message string, fatal bool) {
+	if fatal {
+		log.Fatal(err, message)
+	} else {
+		log.Error(err, message)
+	}
+}
+
 var rootCmd = &cobra.Command{
 	Use:   "gocave",
 	Short: "Find code caves in PE files of given length",
@@ -29,16 +37,18 @@ var rootCmd = &cobra.Command{
 		}
 
 		fileName, err := cmd.Flags().GetString("file")
+		HandleError(err, "Failed to get 'file' parameter", true)
 		minCaveSize, err := cmd.Flags().GetInt("size")
+		HandleError(err, "Failed to get 'size' parameter", true)
 		imageBase, err := cmd.Flags().GetUint32("base")
+		HandleError(err, "Failed to get 'base' parameter", true)
 
 		file := ioReader(fileName)
 		f, err := pe.NewFile(file)
-		if err != nil {
-			log.Fatal(err)
-		}
+		HandleError(err, "Could not create PE file", true)
 
-		var IMAGE_DLLCHARACTERISTICS_DYNAMIC_BASE uint16 = 0x0040 // for compatibility reasons, we don't use the constant located in debug/pe
+		// for compatibility reasons, we don't use the constant located in debug/pe
+		var IMAGE_DLLCHARACTERISTICS_DYNAMIC_BASE uint16 = 0x0040
 		isAslr := f.Characteristics & IMAGE_DLLCHARACTERISTICS_DYNAMIC_BASE
 
 		log.Infof("Looking for code caves in %s", fileName)
@@ -51,9 +61,7 @@ var rootCmd = &cobra.Command{
 		for _, section := range f.Sections {
 			log.Infof("Parsing section %s", section.Name)
 			data, err := section.Data()
-			if err != nil {
-				log.Fatal(err)
-			}
+			HandleError(err, "Could not read Data section " + section.Name + " of PE file", false)
 
 			var count uint32
 			var pos uint32
