@@ -9,8 +9,6 @@ import (
 	"os"
 )
 
-var cfgFile string
-
 func ioReader(file string) io.ReaderAt {
 	r, err := os.Open(file)
 	if err != nil {
@@ -40,7 +38,8 @@ var rootCmd = &cobra.Command{
 			log.Fatal(err)
 		}
 
-		isAslr := f.Characteristics & pe.IMAGE_DLLCHARACTERISTICS_DYNAMIC_BASE
+		var IMAGE_DLLCHARACTERISTICS_DYNAMIC_BASE uint16 = 0x0040 // for compatibility reasons, we don't use the constant located in debug/pe
+		isAslr := f.Characteristics & IMAGE_DLLCHARACTERISTICS_DYNAMIC_BASE
 
 		log.Infof("Looking for code caves in %s", fileName)
 		log.Infof("Image Base: 0x%08x", imageBase)
@@ -50,6 +49,7 @@ var rootCmd = &cobra.Command{
 		}
 
 		for _, section := range f.Sections {
+			log.Infof("Parsing section %s", section.Name)
 			data, err := section.Data()
 			if err != nil {
 				log.Fatal(err)
@@ -68,6 +68,11 @@ var rootCmd = &cobra.Command{
 				}
 				pos++
 			}
+
+			if pos == count {
+				log.Infof("Section %s appears to be empty", section.Name)
+				log.Infof("Cave of %d bytes found in %s at: (Raw Address: 0x%08x, Virtual Address: 0x%08x)", count, section.Name, pos - count, imageBase + section.VirtualAddress)
+			}
 		}
 	},
 }
@@ -80,8 +85,6 @@ func Execute() {
 }
 
 func init() {
-	rootCmd.PersistentFlags().StringVar(&cfgFile, "config", "", "config file (default is $HOME/.gocave.yaml)")
-
 	rootCmd.Flags().StringP("file", "f", "", "PE File to analyze")
 	rootCmd.Flags().IntP("size", "s", 300, "Minimal size of code cave")
 	rootCmd.Flags().Uint32P("base", "b", 0x00400000, "Base address")
