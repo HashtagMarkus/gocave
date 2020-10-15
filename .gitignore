@@ -6,4 +6,8 @@
 .idea/**/shelf
 .idea
 
+*.exe
+gocave32
+gocave64
+
 hashtributer.db
