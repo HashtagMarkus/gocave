@@ -19,10 +19,12 @@ func ioReader(file string) io.ReaderAt {
 }
 
 func HandleError(err error, message string, fatal bool) {
-	if fatal {
-		log.Fatal(err, message)
-	} else {
-		log.Error(err, message)
+	if err != nil {
+		if fatal {
+			log.Fatal(err, message)
+		} else {
+			log.Error(err, message)
+		}
 	}
 }
 
@@ -63,23 +65,18 @@ var rootCmd = &cobra.Command{
 			data, err := section.Data()
 			HandleError(err, "Could not read Data section " + section.Name + " of PE file", false)
 
-			var count uint32
-			var pos uint32
+			nullChunk := NewNullChunk(minCaveSize, imageBase, section)
+			nopChunk := NewNopChunk(minCaveSize, imageBase, section)
+
 			for _, b := range data {
-				if b == 0x00 {
-					count++
-				} else {
-					if count > uint32(minCaveSize) {
-						log.Infof("Cave of %d bytes found in %s at: (Raw Address: 0x%08x, Virtual Address: 0x%08x)", count, section.Name, pos - count, imageBase + section.VirtualAddress + pos - count)
-					}
-					count = 0
-				}
-				pos++
+				nullChunk.checkbyte(b)
+				nopChunk.checkbyte(b)
 			}
 
-			if pos == count {
+			if nullChunk.isEmpty() {
 				log.Infof("Section %s appears to be empty", section.Name)
-				log.Infof("Cave of %d bytes found in %s at: (Raw Address: 0x%08x, Virtual Address: 0x%08x)", count, section.Name, pos - count, imageBase + section.VirtualAddress)
+				log.Infof("Cave of %d bytes found in %s at: (Raw Address: 0x%08x, Virtual Address: 0x%08x)",
+					nullChunk.count, section.Name, nullChunk.pos - nullChunk.count, imageBase + section.VirtualAddress)
 			}
 		}
 	},
