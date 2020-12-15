@@ -87,20 +87,20 @@ var rootCmd = &cobra.Command{
 }
 
 func printSectionInformation(section *pe.Section) {
-	characteristsics := section.Characteristics
+	characteristics := section.Characteristics
 
 	rwx := ""
 
 	var IMAGE_SCN_MEM_EXECUTE uint32 = 0x20000000
 	var IMAGE_SCN_MEM_READ uint32 = 0x40000000
 	var IMAGE_SCN_MEM_WRITE uint32 = 0x80000000
-	if characteristsics & IMAGE_SCN_MEM_READ == IMAGE_SCN_MEM_READ {
+	if characteristics& IMAGE_SCN_MEM_READ == IMAGE_SCN_MEM_READ {
 		rwx += "r"
 	}
-	if characteristsics & IMAGE_SCN_MEM_WRITE == IMAGE_SCN_MEM_WRITE {
+	if characteristics& IMAGE_SCN_MEM_WRITE == IMAGE_SCN_MEM_WRITE {
 		rwx += "w"
 	}
-	if characteristsics & IMAGE_SCN_MEM_EXECUTE == IMAGE_SCN_MEM_EXECUTE {
+	if characteristics& IMAGE_SCN_MEM_EXECUTE == IMAGE_SCN_MEM_EXECUTE {
 		rwx += "x"
 	}
 
