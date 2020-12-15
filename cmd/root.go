@@ -61,7 +61,7 @@ var rootCmd = &cobra.Command{
 		}
 
 		for _, section := range f.Sections {
-			log.Infof("Parsing section %s", section.Name)
+			printSectionInformation(section)
 			data, err := section.Data()
 			HandleError(err, "Could not read Data section " + section.Name + " of PE file", false)
 
@@ -73,6 +73,10 @@ var rootCmd = &cobra.Command{
 				nopChunk.checkbyte(b)
 			}
 
+			// Doing this to trigger report if last byte is null or nop byte
+			nullChunk.checkbyte(0x90)
+			nopChunk.checkbyte(0x00)
+
 			if nullChunk.isEmpty() {
 				log.Infof("Section %s appears to be empty", section.Name)
 				log.Infof("Cave of %d bytes found in %s at: (Raw Address: 0x%08x, Virtual Address: 0x%08x)",
@@ -80,6 +84,27 @@ var rootCmd = &cobra.Command{
 			}
 		}
 	},
+}
+
+func printSectionInformation(section *pe.Section) {
+	characteristsics := section.Characteristics
+
+	rwx := ""
+
+	var IMAGE_SCN_MEM_EXECUTE uint32 = 0x20000000
+	var IMAGE_SCN_MEM_READ uint32 = 0x40000000
+	var IMAGE_SCN_MEM_WRITE uint32 = 0x80000000
+	if characteristsics & IMAGE_SCN_MEM_READ == IMAGE_SCN_MEM_READ {
+		rwx += "r"
+	}
+	if characteristsics & IMAGE_SCN_MEM_WRITE == IMAGE_SCN_MEM_WRITE {
+		rwx += "w"
+	}
+	if characteristsics & IMAGE_SCN_MEM_EXECUTE == IMAGE_SCN_MEM_EXECUTE {
+		rwx += "x"
+	}
+
+	log.Infof("Parsing section %s (%s)", section.Name, rwx)
 }
 
 func Execute() {
