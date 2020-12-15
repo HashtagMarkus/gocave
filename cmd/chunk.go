@@ -48,8 +48,8 @@ func (c *chunk) checkbyte(b byte) {
 		c.count++
 	} else {
 		if c.count > uint32(c.minCaveSize) {
-			log.Infof("%s: Cave of %d bytes found in %s at: (Raw Address: 0x%08x, Virtual Address: 0x%08x)", c.chunkType,
-				c.count, c.section.Name, c.pos - c.count, c.imageBase + c.section.VirtualAddress + c.pos - c.count)
+			log.Infof("\t%d bytes\tat: (Raw Address: 0x%08x \tVirtual Address: 0x%08x)", c.count,
+				c.pos - c.count, c.imageBase + c.section.VirtualAddress + c.pos - c.count)
 		}
 		c.count = 0
 	}

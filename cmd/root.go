@@ -104,7 +104,7 @@ func printSectionInformation(section *pe.Section) {
 		rwx += "x"
 	}
 
-	log.Infof("Parsing section %s (%s)", section.Name, rwx)
+	log.Infof("# Parsing section %s (%s)", section.Name, rwx)
 }
 
 func Execute() {
