@@ -1,7 +1,7 @@
 # GoCave
 
 Finds code caves inside of a PE binary.
-This project is a port go of https://github.com/axcheron/pycave which is implemented in python.
+This project is a go port of https://github.com/axcheron/pycave which is implemented in python.
 
 ## Usage
 
@@ -35,7 +35,7 @@ GOOS=windows GOARCH=386 go build -o gocave.exe ./main.go
 
 ### Windows Vista
 
-In order to build this for older Versions like Vista, golang Version 1.10.x need to be used.
+In order to build this for older Windows Versions like Vista, golang Version 1.10.x needs to be used.
 
 ```
 GOOS=windows GOARCH=386 go build -o gocave.exe ./main.go
